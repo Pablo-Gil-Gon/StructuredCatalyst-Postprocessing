@@ -1,0 +1,91 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Porous Reynolds number:
+Rep $caseRep;
+// Radius of channels [mm]:
+r $Rchannels;
+// Fluid density [Kg/m3]:
+rho $RHO;
+// Porosity:
+por $porosity;
+// Dynamic viscosity [Pa*s];
+flumu $MU;
+
+// Inlet velocity:
+inletU #calc "$Rep * $flumu * $por / (2.0*0.001*$r*$rho)";
+#codeStream
+{
+    code
+    #{
+        scalar Fiz = Foam::readScalar(dict.lookup("inletU"));
+        Info << "--------------------------------------------------------- inletU = " << Fiz << endl;
+    #};
+}
+
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 $inletU);
+//internalField   uniform (0 0 1.0e-3);
+
+boundaryField
+{
+    //- Set patchGroups for constraint patches
+    #includeEtc "caseDicts/setConstraintTypes"
+
+    fluidInlet
+    {
+        //type            zeroGradient;
+        type            fixedValue;
+        value           uniform (0 0 $inletU);
+    }
+
+    fluidOutlet
+    {
+        type            zeroGradient;
+    }
+
+    cylExtSurf
+    {
+        type            noSlip;
+    }
+
+    Channels_to_Catalyst
+    {
+        type            noSlip;
+    }
+
+    inletCatalystFluidWall_to_inletCatalyst
+    {
+        type            noSlip;
+    }
+
+    outletCatalystFluidWall_to_outletCatalyst
+    {
+        type            noSlip;
+    }
+    
+    y0symsurf
+    {
+        type            symmetry;
+    }
+
+    x0symsurf
+    {
+        type            symmetry;
+    }
+}
+
+// ************************************************************************* //

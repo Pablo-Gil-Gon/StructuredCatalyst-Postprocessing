@@ -1,0 +1,260 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// This version of the blockMeshDict creates the geometry of just one qurter of 
+// the pipe and the catalyst
+scale   0.001;
+
+Rext $R;
+Lf $Lfront;
+Lc $Lcat;
+Lb $Lback;
+Fiz #calc " - $Lf - $Lc /2";   //z coordinate of the fluid inlet
+Foz #calc " $Lb + $Lc /2";    //z coordinate of the fluid outlet
+Sqside #calc " $Rext / 2.0";
+ns $NumberOfSectors;
+ang #calc "2*3.14159265359/$ns";
+diag #calc "$Sqside*sqrt(2.0)";
+nCellsR $NCellsRadius;
+
+/*
+nCellsSqside #codeStream
+{
+    code
+    #{
+        scalar nCellsR = Foam::readScalar(dict.lookup("nCellsR"));
+        scalar R = Foam::readScalar(dict.lookup("Rext"));
+        scalar Sqside = Foam::readScalar(dict.lookup("Sqside"));
+        scalar nCellsSqside = (int)round(nCellsR*Sqside/R);
+        //Info << "--------------------------------------------------------- nCellsSqside = " << nCellsSqside << endl;
+        writeEntry(os, "", nCellsSqside);
+    #};
+};
+*/
+nCellsR_Sqside #codeStream
+{
+    code
+    #{
+        scalar nCellsR = Foam::readScalar(dict.lookup("nCellsR"));
+        scalar R = Foam::readScalar(dict.lookup("Rext"));
+        scalar Sqside = Foam::readScalar(dict.lookup("Sqside"));
+        scalar diag =  Foam::readScalar(dict.lookup("diag"));
+
+        scalar nCellsR_Sqside = (int)round(nCellsR*((R-Sqside+R-diag)/2.0)/R);
+        //Info << "--------------------------------------------------------- nCellsSqside = " << nCellsR_Sqside << endl;
+        writeEntry(os, "", nCellsR_Sqside);
+    #};
+};
+nCellsS2 #codeStream
+{
+    code
+    #{
+        scalar nCellsR = Foam::readScalar(dict.lookup("nCellsR"));
+        scalar R = Foam::readScalar(dict.lookup("Rext"));
+        scalar Sqside = Foam::readScalar(dict.lookup("Sqside"));
+        scalar ang = Foam::readScalar(dict.lookup("ang"));
+        scalar diag =  Foam::readScalar(dict.lookup("diag"));
+
+        scalar a = Sqside;
+        scalar b = R - diag;
+        scalar nCellsS2 = (int)round(nCellsR*((sqrt(pow(a,2)+pow(b,2)-2*a*b*cos(ang/2.0))+Sqside)/2.0)/R);
+        //Info << "--------------------------------------------------------- nCellsSqside = " << nCellsR_Sqside << endl;
+        writeEntry(os, "", nCellsS2);
+    #};
+};
+nCellsLong #codeStream
+{
+    code
+    #{
+        scalar nCellsR = Foam::readScalar(dict.lookup("nCellsR"));
+        scalar R = Foam::readScalar(dict.lookup("Rext"));
+        scalar Fiz = Foam::readScalar(dict.lookup("Fiz"));
+        scalar Foz = Foam::readScalar(dict.lookup("Foz"));
+        scalar nCellsLong = (int)round(nCellsR*(Foz-Fiz)/R);
+        //Info << "--------------------------------------------------------- nCellsLong = " << nCellsLong << endl;
+        writeEntry(os, "", nCellsLong);
+    #};
+};
+
+#codeStream
+{
+    code
+    #{
+        scalar Fiz = Foam::readScalar(dict.lookup("Fiz"));
+        Info << "--------------------------------------------------------- Fiz = " << Fiz << endl;
+    #};
+}
+
+sinang #codeStream
+{
+    code
+    #{
+        scalar ang = Foam::readScalar(dict.lookup("ang"));
+        scalar res = sin(ang);
+        writeEntry(os, "", res);
+    #};
+};
+cosang #codeStream
+{
+    code
+    #{
+        scalar ang = Foam::readScalar(dict.lookup("ang"));
+        scalar res = cos(ang);
+        writeEntry(os, "", res);
+    #};
+};
+sinang_2 #codeStream
+{
+    code
+    #{
+        scalar ang = Foam::readScalar(dict.lookup("ang"));
+        scalar res = sin(ang/2.0);
+        writeEntry(os, "", res);
+    #};
+};
+cosang_2 #codeStream
+{
+    code
+    #{
+        scalar ang = Foam::readScalar(dict.lookup("ang"));
+        scalar res = cos(ang/2.0);
+        writeEntry(os, "", res);
+    #};
+};
+sinang_4 #codeStream
+{
+    code
+    #{
+        scalar ang = Foam::readScalar(dict.lookup("ang"));
+        scalar res = sin(ang/4.0);
+        writeEntry(os, "", res);
+    #};
+};
+cosang_4 #codeStream
+{
+    code
+    #{
+        scalar ang = Foam::readScalar(dict.lookup("ang"));
+        scalar res = cos(ang/4.0);
+        writeEntry(os, "", res);
+    #};
+};
+sin3ang_4 #codeStream
+{
+    code
+    #{
+        scalar ang = Foam::readScalar(dict.lookup("ang"));
+        scalar res = sin(ang*3.0/4.0);
+        writeEntry(os, "", res);
+    #};
+};
+cos3ang_4 #codeStream
+{
+    code
+    #{
+        scalar ang = Foam::readScalar(dict.lookup("ang"));
+        scalar res = cos(ang*3.0/4.0);
+        writeEntry(os, "", res);
+    #};
+};
+
+vertices
+(
+    ($Sqside                                        0.0                                         #calc "$Fiz")   // 0
+    (#calc "$cosang_2*$diag"    #calc "$sinang_2*$diag" #calc "$Fiz")   // 1
+    (#calc "$Sqside*$cosang"                      #calc "$Sqside*$sinang"                   #calc "$Fiz")   // 2
+    (0.0                                            0.0                                         #calc "$Fiz")   // 3
+    ($Sqside                                        0.0                                         #calc "$Foz")   // 4
+    (#calc "$cosang_2*$diag"    #calc "$sinang_2*$diag" #calc "$Foz")   // 5
+    (#calc "$Sqside*$cosang"                      #calc "$Sqside*$sinang"                   #calc "$Foz")   // 6
+    (0.0                                            0.0                                         #calc "$Foz")   // 7
+    (#calc "$Rext"                  0.0                             #calc "$Fiz")   // 8
+    (#calc "$Rext*$cosang_2"    #calc "$Rext*$sinang_2"     #calc "$Fiz")   // 9
+    (#calc "$Rext*$cosang"        #calc "$Rext*$sinang"         #calc "$Fiz")   // 10
+    (#calc "$Rext"                  0.0                             #calc "$Foz")   // 11
+    (#calc "$Rext*$cosang_2"    #calc "$Rext*$sinang_2"     #calc "$Foz")   // 12
+    (#calc "$Rext*$cosang"        #calc "$Rext*$sinang"         #calc "$Foz")   // 13
+
+);
+
+
+blocks
+(
+    hex (3 0 1 2 7 4 5 6) backgroundbrick ($nCellsS2 $nCellsS2 $nCellsLong) simpleGrading (1 1 1)
+    hex (0 8 9 1 4 11 12 5) backgroundbrick ($nCellsR_Sqside $nCellsS2 $nCellsLong) simpleGrading (1 1 1)
+    hex (1 9 10 2 5 12 13 6) backgroundbrick ($nCellsR_Sqside $nCellsS2 $nCellsLong) simpleGrading (1 1 1)
+);
+
+edges
+(
+    arc 8 9 (#calc "$Rext * $cosang_4"      #calc "$Rext * $sinang_4"       #calc "$Fiz")
+    arc 9 10 (#calc "$Rext * $cos3ang_4"      #calc "$Rext * $sin3ang_4"       #calc "$Fiz")
+    arc 12 11 (#calc "$Rext * $cosang_4"      #calc "$Rext * $sinang_4"       #calc "$Foz")
+    arc 13 12 (#calc "$Rext * $cos3ang_4"      #calc "$Rext * $sin3ang_4"       #calc "$Foz")
+);
+
+boundary
+(
+    fluidInlet
+    {
+        type patch;
+        faces
+        (
+            (0 1 2 3)
+            (0 8 9 1)
+            (1 9 10 2)
+        );
+    }
+    fluidOutlet
+    {
+        type patch;
+        faces
+        (
+            (4 7 6 5)
+            (4 5 12 11)
+            (6 13 12 5)
+        );
+    }
+    cylExtSurf
+    {
+        type patch;
+        faces
+        (
+            (8 11 12 9)
+            (9 12 13 10)
+        );
+    }
+    y0symsurf
+    {
+        type symmetry;
+        faces
+        (
+            (0 3 7 4)
+            (0 4 11 8)
+        );
+    }
+    x0symsurf
+    {
+        type symmetry;
+        faces
+        (
+            (2 6 7 3)
+            (2 10 13 6)
+        );
+    }
+);
+
+
+// ************************************************************************* //

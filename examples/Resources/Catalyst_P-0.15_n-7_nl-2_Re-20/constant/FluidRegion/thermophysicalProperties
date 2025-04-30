@@ -1,0 +1,59 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "constant/FluidRegion";
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Import fluid properties:
+fluidrho $RHO;
+fluidmu $MU;
+fluidcp $FluidCP;
+fluidpr $FluidPr;
+flumw $FluidMW;
+
+thermoType
+{
+    type            heRhoThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          hConst;
+    equationOfState rhoConst;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
+
+mixture
+{
+    specie
+    {
+        nMoles          1;
+        molWeight       $flumw;
+    }
+    thermodynamics
+    {
+        Cp              $fluidcp;
+        Hf              0; //???2.544e+06;//
+    }
+    equationOfState
+    {
+        rho             $fluidrho;
+    }
+    transport
+    {
+        mu              $fluidmu;
+        Pr              $fluidpr;
+    }
+}
+
+
+
+// ************************************************************************* //

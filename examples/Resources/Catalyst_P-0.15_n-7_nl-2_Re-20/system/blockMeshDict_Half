@@ -1,0 +1,175 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// This version of the blockMeshDict creates the geometry of just one qurter of 
+// the pipe and the catalyst
+scale   0.001;
+
+Rext $R;
+Sqside #calc " $Rext";
+Lf $Lfront;
+Lc $Lcat;
+Lb $Lback;
+Fiz #calc " - $Lf - $Lc /2";   //z coordinate of the fluid inlet
+Foz #calc " $Lb + $Lc /2";    //z coordinate of the fluid outlet
+ns $NumberOfSectors;
+ang #calc "2*3.14159265359/$ns";
+nCellsR $NCellsRadius;
+
+vertices
+(
+    (#calc "$Sqside * 1.0/2.0"     0.0                 #calc "$Fiz")   // 0
+    (#calc "$Sqside * 1.0/2.0"     #calc "$Sqside * 1.0/2.0" #calc "$Fiz")   // 1
+    (#calc "-$Sqside * 1.0/2.0"     #calc "$Sqside * 1.0/2.0" #calc "$Fiz")   // 2
+    (#calc "-$Sqside * 1.0/2.0"     0.0                 #calc "$Fiz")   // 3
+    (#calc "$Sqside * 1.0/2.0"     0.0                 #calc "$Foz")   // 4
+    (#calc "$Sqside * 1.0/2.0"     #calc "$Sqside * 1.0/2.0" #calc "$Foz")   // 5
+    (#calc "-$Sqside * 1.0/2.0"     #calc "$Sqside * 1.0/2.0" #calc "$Foz")   // 6
+    (#calc "-$Sqside * 1.0/2.0"     0.0                 #calc "$Foz")   // 7
+    (#calc "$Rext"          0.0                 #calc "$Fiz")   // 8
+    (#calc "$Rext*sqrt(2.0)/2.0"    #calc "$Rext*sqrt(2.0)/2.0"     #calc "$Fiz")   // 9
+    (#calc "-$Rext*sqrt(2.0)/2.0"    #calc "$Rext*sqrt(2.0)/2.0"     #calc "$Fiz")   // 10
+    (#calc "-$Rext"          0.0                 #calc "$Fiz")   // 11
+    (#calc "$Rext"          0.0                 #calc "$Foz")   // 12
+    (#calc "$Rext*sqrt(2.0)/2.0"    #calc "$Rext*sqrt(2.0)/2.0"     #calc "$Foz")   // 13
+    (#calc "-$Rext*sqrt(2.0)/2.0"    #calc "$Rext*sqrt(2.0)/2.0"     #calc "$Foz")   // 14
+    (#calc "-$Rext"          0.0                 #calc "$Foz")   // 15
+);
+
+nCellsSqside #codeStream
+{
+    code
+    #{
+        scalar nCellsR = Foam::readScalar(dict.lookup("nCellsR"));
+        scalar R = Foam::readScalar(dict.lookup("Rext"));
+        scalar Sqside = Foam::readScalar(dict.lookup("Sqside"));
+
+        scalar nCellsSqside = (int)round(nCellsR*(Sqside/2.0 + 3.14159*R/4.0)/R);
+        //Info << "--------------------------------------------------------- nCellsSqside = " << nCellsSqside << endl;
+        writeEntry(os, "", nCellsSqside);
+    #};
+};
+
+nCellsSqside_2 #codeStream
+{
+    code
+    #{
+        scalar nCellsR = Foam::readScalar(dict.lookup("nCellsR"));
+        scalar R = Foam::readScalar(dict.lookup("Rext"));
+        scalar Sqside = Foam::readScalar(dict.lookup("Sqside"));
+
+        scalar nCellsSqside = (int)round(nCellsR*(Sqside/4.0+3.14159*R/8.0)/R);
+        //Info << "--------------------------------------------------------- nCellsSqside = " << nCellsSqside << endl;
+        writeEntry(os, "", nCellsSqside);
+    #};
+};
+
+nCellsR_Sqside #codeStream
+{
+    code
+    #{
+        scalar nCellsR = Foam::readScalar(dict.lookup("nCellsR"));
+        scalar R = Foam::readScalar(dict.lookup("Rext"));
+        scalar Sqside = Foam::readScalar(dict.lookup("Sqside"));
+
+        scalar nCellsR_Sqside = (int)round(nCellsR*((R-Sqside/2.0 + R - Sqside*sqrt(2.0)/2.0)/2.0)/R);
+        //Info << "--------------------------------------------------------- nCellsSqside = " << nCellsR_Sqside << endl;
+        writeEntry(os, "", nCellsR_Sqside);
+    #};
+};
+
+nCellsLong #codeStream
+{
+    code
+    #{
+        scalar nCellsR = Foam::readScalar(dict.lookup("nCellsR"));
+        scalar R = Foam::readScalar(dict.lookup("Rext"));
+        scalar Fiz = Foam::readScalar(dict.lookup("Fiz"));
+        scalar Foz = Foam::readScalar(dict.lookup("Foz"));
+        scalar nCellsLong = (int)round(nCellsR*(Foz-Fiz)/R);
+        //Info << "--------------------------------------------------------- nCellsLong = " << nCellsLong << endl;
+        writeEntry(os, "", nCellsLong);
+    #};
+};
+
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) backgroundbrick ($nCellsSqside_2 $nCellsSqside $nCellsLong) simpleGrading (1 1 1)
+    hex (0 8 9 1 4 12 13 5) backgroundbrick ($nCellsR_Sqside $nCellsSqside_2 $nCellsLong) simpleGrading (1 1 1)
+    hex (1 9 10 2 5 13 14 6) backgroundbrick ($nCellsR_Sqside $nCellsSqside $nCellsLong) simpleGrading (1 1 1)
+    hex (2 10 11 3 6 14 15 7) backgroundbrick ($nCellsR_Sqside $nCellsSqside_2 $nCellsLong) simpleGrading (1 1 1)
+);
+
+edges
+(
+    arc 8 9 (#calc "$Rext*sqrt(3.0)/2.0"      #calc "$Rext /2.0"       #calc "$Fiz")
+    arc 12 13 (#calc "$Rext*sqrt(3.0)/2.0"      #calc "$Rext /2.0"       #calc "$Foz")
+
+    arc 9 10 (0.0      $Rext       #calc "$Fiz")
+    arc 13 14 (0.0      $Rext       #calc "$Foz")
+
+    arc 10 11 (#calc "-$Rext*sqrt(3.0)/2.0"      #calc "$Rext /2.0"       #calc "$Fiz")
+    arc 14 15 (#calc "-$Rext*sqrt(3.0)/2.0"      #calc "$Rext /2.0"       #calc "$Foz")
+);
+
+boundary
+(
+    fluidInlet
+    {
+        type patch;
+        faces
+        (
+            (0 1 2 3)
+            (0 8 9 1)
+            (1 9 10 2)
+            (2 10 11 3)
+        );
+    }
+    fluidOutlet
+    {
+        type patch;
+        faces
+        (
+            (4 7 6 5)
+            (12 4 5 13)
+            (5 6 14 13)
+            (6 7 15 14)
+        );
+    }
+    cylExtSurf
+    {
+        type patch;
+        faces
+        (
+            (8 12 13 9)
+            (9 13 14 10)
+            (10 14 15 11)
+        );
+    }
+    y0symsurf
+    {
+        type            symmetry;
+        faces
+        (
+            (0 3 7 4)
+            (0 4 12 8)
+            (3 11 15 7)
+        );
+    }
+);
+
+
+// ************************************************************************* //

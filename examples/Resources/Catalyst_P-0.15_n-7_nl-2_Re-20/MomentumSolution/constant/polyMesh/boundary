@@ -1,0 +1,90 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+6
+(
+    fluidInlet
+    {
+        type            patch;
+        nFaces          465;
+        startFace       374596;
+    }
+    fluidOutlet
+    {
+        type            patch;
+        nFaces          465;
+        startFace       375061;
+    }
+    cylExtSurf
+    {
+        type            patch;
+        nFaces          7452;
+        startFace       375526;
+    }
+    inletCatalystFluidWall_to_inletCatalyst
+    {
+        type            mappedWall;
+        inGroups        List<word> 
+3
+(
+FluidRegionZone_to_CatalystRegionZone
+wall
+mappedPatch
+)
+;
+        nFaces          1330;
+        startFace       382978;
+        sampleMode      nearestPatchFace;
+        sampleRegion    CatalystRegion;
+        samplePatch     inletCatalyst_to_inletCatalystFluidWall;
+    }
+    outletCatalystFluidWall_to_outletCatalyst
+    {
+        type            mappedWall;
+        inGroups        List<word> 
+3
+(
+FluidRegionZone_to_CatalystRegionZone
+wall
+mappedPatch
+)
+;
+        nFaces          2085;
+        startFace       384308;
+        sampleMode      nearestPatchFace;
+        sampleRegion    CatalystRegion;
+        samplePatch     outletCatalyst_to_outletCatalystFluidWall;
+    }
+    Channels_to_Catalyst
+    {
+        type            mappedWall;
+        inGroups        List<word> 
+3
+(
+FluidRegionZone_to_CatalystRegionZone
+wall
+mappedPatch
+)
+;
+        nFaces          39784;
+        startFace       386393;
+        sampleMode      nearestPatchFace;
+        sampleRegion    CatalystRegion;
+        samplePatch     Catalyst_to_Channels;
+    }
+)
+
+// ************************************************************************* //

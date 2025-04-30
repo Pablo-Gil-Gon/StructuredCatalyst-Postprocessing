@@ -1,0 +1,56 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       volScalarField;
+    location    "6.0000491/FluidRegion";
+    object      rho;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [1 -3 0 0 0 0 0];
+
+internalField   uniform 1.19;
+
+boundaryField
+{
+    fluidInlet
+    {
+        type            calculated;
+        value           uniform 1.19;
+    }
+    fluidOutlet
+    {
+        type            calculated;
+        value           uniform 1.19;
+    }
+    cylExtSurf
+    {
+        type            calculated;
+        value           uniform 1.19;
+    }
+    inletCatalystFluidWall_to_inletCatalyst
+    {
+        type            calculated;
+        value           uniform 1.19;
+    }
+    outletCatalystFluidWall_to_outletCatalyst
+    {
+        type            calculated;
+        value           uniform 1.19;
+    }
+    Channels_to_Catalyst
+    {
+        type            calculated;
+        value           uniform 1.19;
+    }
+}
+
+
+// ************************************************************************* //

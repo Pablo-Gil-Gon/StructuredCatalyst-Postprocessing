@@ -1,0 +1,78 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+4
+(
+    cylExtSurf
+    {
+        type            patch;
+        nFaces          20044;
+        startFace       921529;
+    }
+    Catalyst_to_Channels
+    {
+        type            mappedWall;
+        inGroups        List<word> 
+3
+(
+FluidRegionZone_to_CatalystRegionZone
+wall
+mappedPatch
+)
+;
+        nFaces          84267;
+        startFace       941573;
+        sampleMode      nearestPatchFace;
+        sampleRegion    FluidRegion;
+        samplePatch     Channels_to_Catalyst;
+    }
+    inletCatalyst_to_inletCatalystFluidWall
+    {
+        type            mappedWall;
+        inGroups        List<word> 
+3
+(
+FluidRegionZone_to_CatalystRegionZone
+wall
+mappedPatch
+)
+;
+        nFaces          3629;
+        startFace       1025840;
+        sampleMode      nearestPatchFace;
+        sampleRegion    FluidRegion;
+        samplePatch     inletCatalystFluidWall_to_inletCatalyst;
+    }
+    outletCatalyst_to_outletCatalystFluidWall
+    {
+        type            mappedWall;
+        inGroups        List<word> 
+3
+(
+FluidRegionZone_to_CatalystRegionZone
+wall
+mappedPatch
+)
+;
+        nFaces          3629;
+        startFace       1029469;
+        sampleMode      nearestPatchFace;
+        sampleRegion    FluidRegion;
+        samplePatch     outletCatalystFluidWall_to_outletCatalyst;
+    }
+)
+
+// ************************************************************************* //

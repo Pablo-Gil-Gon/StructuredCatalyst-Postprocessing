@@ -1,0 +1,85 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       volScalarField;
+    location    "0/FluidRegion";
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Reference temperature for isothermic case:
+tzeroTemp $initTemp;
+inletFTemp $inletTemp;
+
+dimensions      [ 0 0 0 1 0 0 0 ];
+
+internalField   uniform $tzeroTemp;
+
+boundaryField
+{
+    #includeEtc "caseDicts/setConstraintTypes"
+
+    fluidInlet
+    {
+        type            fixedValue;
+        value           uniform $inletFTemp;
+    }
+    
+    fluidOutlet
+    {
+        type            zeroGradient;
+    }
+
+    cylExtSurf
+    {
+        type            zeroGradient;
+    }
+
+    Channels_to_Catalyst
+    {
+        type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        value           $internalField;
+        Tnbr            T;
+    }
+
+    inletCatalystFluidWall_to_inletCatalyst
+    {
+        type            fixedValue;
+        value           uniform $inletFTemp;
+        //type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        //value           $internalField;
+        //Tnbr            T;
+    }
+
+    outletCatalystFluidWall_to_outletCatalyst
+    {
+        type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        value           $internalField;
+        Tnbr            T;
+    }
+
+    FluidRegionZone_to_CatalystRegionZone
+    {
+        type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        value           $internalField;
+        Tnbr            T;
+    }
+
+    y0symsurf
+    {
+        type            symmetry;
+    }
+
+    x0symsurf
+    {
+        type            symmetry;
+    }
+}
+
+// ************************************************************************* //

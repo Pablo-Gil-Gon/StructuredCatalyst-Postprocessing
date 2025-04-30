@@ -1,0 +1,66 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       volScalarField;
+    location    "0/CatalystRegion";
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+tzeroTemp $initTemp;
+TempWall $wallTemp;
+inletFTemp $inletTemp;
+
+dimensions      [ 0 0 0 1 0 0 0 ];
+
+internalField   uniform $tzeroTemp;
+
+boundaryField
+{
+    #includeEtc "caseDicts/setConstraintTypes"
+
+    cylExtSurf
+    {
+        type            fixedValue;
+        value           uniform $TempWall;
+    }
+    CatalystRegionZone_to_FluidRegionZone
+    {
+        type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        value           $internalField;
+        Tnbr            T;
+    }
+
+    Catalyst_to_Channels
+    {
+        type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        value           $internalField;
+        Tnbr            T;
+    }
+
+    inletCatalyst_to_inletCatalystFluidWall
+    {
+        type            fixedValue;
+        value           uniform $inletFTemp;
+        //type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        //value           $internalField;
+        //Tnbr            T;
+    }
+
+    outletCatalyst_to_outletCatalystFluidWall
+    {
+        type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        value           $internalField;
+        Tnbr            T;
+    }
+
+}
+
+// ************************************************************************* //
