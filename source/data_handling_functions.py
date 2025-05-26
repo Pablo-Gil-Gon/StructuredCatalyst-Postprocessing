@@ -344,8 +344,8 @@ def read_simulation_data(   case_path: str,
         'last' which just reads the last timestep of the thermal 
         simulation. Option 'all' reads all the existing timesteps.
 
-    Returns Nothing
-    ---------------
+    Returns
+    -------
     datafilename : str
         Name of the file with the data from the results, as a string
 
@@ -437,11 +437,11 @@ def read_simulation_data(   case_path: str,
 
     # Timestep [0] is the '0' folder, skip that one.
     if mode == 'last':
+        timesteps_to_read_thermal = timesteps_thermal[-1]
+        timesteps_to_read_momentum = timesteps_momentum[-1]
+    elif mode == 'all':
         timesteps_to_read_thermal = timesteps_thermal[1:]
         timesteps_to_read_momentum = timesteps_momentum[1:]
-    elif mode == 'all':
-        timesteps_to_read_thermal = timesteps_thermal
-        timesteps_to_read_momentum = timesteps_momentum
     else:
         warnmessage = "mode argument must be either 'all' or 'last' (default)"
         warnings.warn(warnmessage)
@@ -476,8 +476,8 @@ def read_simulation_data(   case_path: str,
     sim_data = {"Parameters": params,
                 "SolidMesh": solidmesh, 
                 "FluidMesh": fluidmesh, 
-                "MomentumTimesteps": timesteps_momentum,
-                "ThermalTimesteps": timesteps_thermal,
+                "MomentumTimesteps": timesteps_to_read_momentum,
+                "ThermalTimesteps": timesteps_to_read_thermal,
                 "FluidTemperature": T_fluid,
                 "SolidTemperature": T_solid,
                 "StaticPressure": static_p,
