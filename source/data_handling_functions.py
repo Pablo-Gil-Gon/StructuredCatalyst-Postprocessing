@@ -314,7 +314,8 @@ def read_simulation_data(   case_path: str,
                             fluid_region_name: str = 'FluidRegion/', 
                             solid_region_name: str = 'CatalystRegion/', 
                             momentum_simulation_folder: str = 'MomentumSolution/',
-                            config_file_name: str = 'caseConfig.sh' 
+                            config_file_name: str = 'caseConfig.sh',
+                            mode: str = 'last'
                         ) -> str:
     """Function for reading the simulation data (mesh and results)
 
@@ -338,6 +339,10 @@ def read_simulation_data(   case_path: str,
         files are. By default 'MomentumSolution/'
     config_file_name : str
         Name of the case config file (default name 'caseConfig.sh')
+    mode : str
+        Set which timesteps to read and save to file. Default is 
+        'last' which just reads the last timestep of the thermal 
+        simulation. Option 'all' reads all the existing timesteps.
 
     Returns Nothing
     ---------------
@@ -431,8 +436,15 @@ def read_simulation_data(   case_path: str,
     #       some of the magnitudes.
 
     # Timestep [0] is the '0' folder, skip that one.
-    timesteps_to_read_thermal = timesteps_thermal[1:]
-    timesteps_to_read_momentum = timesteps_momentum[1:]
+    if mode == 'last':
+        timesteps_to_read_thermal = timesteps_thermal[1:]
+        timesteps_to_read_momentum = timesteps_momentum[1:]
+    elif mode == 'all':
+        timesteps_to_read_thermal = timesteps_thermal
+        timesteps_to_read_momentum = timesteps_momentum
+    else:
+        warnmessage = "mode argument must be either 'all' or 'last' (default)"
+        warnings.warn(warnmessage)
 
     # Parse each field for each timestep and store them in a list.
     #  Each element of the list contains the value of the field in 
