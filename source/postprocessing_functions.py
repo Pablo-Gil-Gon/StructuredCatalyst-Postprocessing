@@ -310,17 +310,16 @@ def get_timestep_folders(case_path: str) -> list[str]:
     return sorted(timestep_folders, key=lambda x: float(x))
 
 
-
 def read_simulation_data(   case_path: str, 
                             fluid_region_name: str = 'FluidRegion/', 
                             solid_region_name: str = 'CatalystRegion/', 
                             momentum_simulation_folder: str = 'MomentumSolution/',
                             config_file_name: str = 'caseConfig.sh' 
-                        ):
+                        ) -> str:
     """Function for reading the simulation data (mesh and results)
 
-    This function reads the simulation files and saves the 
-    information in Python objects and lists and saves the data in a 
+    This function reads the simulation files, saves the 
+    information in Python objects and lists and stores in a 
     joblib file in the same simulation directory.
 
     Parameters
@@ -342,6 +341,8 @@ def read_simulation_data(   case_path: str,
 
     Returns Nothing
     ---------------
+    datafilename : str
+        Name of the file with the data from the results, as a string
 
     Results
     -------
@@ -473,6 +474,8 @@ def read_simulation_data(   case_path: str,
     datafilename = case_path + "Case_P" + str(params.porosity) + "_Re" + str(params.Rep) + "_DATA.joblib"
 
     joblib.dump(sim_data, datafilename)
+
+    return datafilename
 
 
 
